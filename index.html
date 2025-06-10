@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EduFlow — персонализированное обучение</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="hero">
+        <div class="container">
+            <nav>
+                <h1 class="logo">EduFlow</h1>
+                <ul class="nav-links">
+                    <a href="#about">О сервисе</a>
+                    <a href="#features">Функции</a>
+                    <a href="#pricing">Тарифы</a>
+                    <a href="#contact">Контакты</a>
+                </ul>
+            </nav>
+            <div class="hero-text">
+                <h2>Ваш уникальный путь к знаниям</h2>
+                <p>Индивидуальные задания, мотивация и обратная связь — всё в одном месте.</p>
+                <a href="#auth" class="btn">Начать бесплатно</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2>Что такое EduFlow?</h2>
+            <p>EduFlow — это интеллектуальная платформа для школьников, учителей и родителей. Мы используем искусственный интеллект, чтобы предложить персонализированный путь обучения каждому ученику.</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2>Основные функции</h2>
+            <div class="feature-list">
+                <div class="feature-item">🎯 Адаптивное обучение</div>
+                <div class="feature-item">🎮 Геймификация</div>
+                <div class="feature-item">📈 Мониторинг прогресса</div>
+                <div class="feature-item">💬 Обратная связь от учителей</div>
+                <div class="feature-item">👥 Командная работа</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+<section id="pricing" class="pricing">
+    <div class="container">
+        <h2>Выберите тариф</h2>
+        <div class="pricing-cards" id="pricingCards">
+            <div class="card" data-plan="free">
+                <h3>Бесплатный</h3>
+                <p>Базовые функции</p>
+                <span class="price">₽0</span>
+                <ul>
+                    <li>Доступ к базовым заданиям</li>
+                    <li>Мониторинг успеваемости</li>
+                </ul>
+            </div>
+            <div class="card premium" data-plan="premium">
+                <h3>Premium</h3>
+                <p>Полный доступ</p>
+                <span class="price">₽499/мес</span>
+                <ul>
+                    <li>Персонализированные задания</li>
+                    <li>Геймификация</li>
+                    <li>Обратная связь от учителя</li>
+                </ul>
+            </div>
+        </div>
+        <p><strong>Вы выбрали:</strong> <span id="selectedPlan">Ничего не выбрано</span></p>
+    </div>
+</section>
+
+    <!-- Auth Section -->
+<section id="auth" class="auth">
+    <div class="container">
+        <h2>Регистрация или Вход</h2>
+
+        <!-- Вкладки -->
+        <div class="tabs">
+            <button class="tab active" data-tab="signup">Регистрация</button>
+            <button class="tab" data-tab="login">Войти</button>
+        </div>
+
+        <!-- Формы -->
+        <div class="tab-content">
+
+            <!-- Регистрация -->
+            <form id="signupForm" class="tab-pane active">
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="password" name="password" placeholder="Придумайте пароль" required />
+                <label>
+                    <input type="checkbox" required />
+                    Я согласен с политикой конфиденциальности
+                </label>
+                <button type="submit" class="btn">Зарегистрироваться</button>
+            </form>
+
+            <!-- Вход -->
+            <form id="loginForm" class="tab-pane">
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="password" name="password" placeholder="Пароль" required />
+                <button type="submit" class="btn">Войти</button>
+            </form>
+
+        </div>
+
+        <p class="small-text">Подпишитесь и получите 7 дней бесплатно!</p>
+    </div>
+
+    <!-- Попап -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <span id="closePopup">&times;</span>
+            <h3>Спасибо за регистрацию!</h3>
+            <p>Добро пожаловать в EduFlow. Мы выслали вам письмо на почту.</p>
+            <button id="goToDashboard">Перейти к обучению</button>
+        </div>
+    </div>
+</section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 EduFlow. Все права защищены.</p>
+        </div>
+    </footer>
+<script>
+    // Выбор тарифа
+    const cards = document.querySelectorAll('.pricing .card');
+    const selectedPlan = document.getElementById('selectedPlan');
+
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            cards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            const plan = card.dataset.plan;
+            selectedPlan.textContent = plan === 'free' ? 'Бесплатный' : 'Premium';
+        });
+    });
+
+    // Переключение вкладок
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab + 'Form').classList.add('active');
+        });
+    });
+
+    // Регистрация
+    const signupForm = document.getElementById('signupForm');
+    const popup = document.getElementById('popup');
+
+    signupForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = this.email.value.trim();
+    const password = this.password.value;
+
+    // Получаем выбранный тариф
+    const chosenPlan = document.getElementById('selectedPlan').textContent.toLowerCase();
+
+    if (!email || !password) {
+        alert('Введите email и пароль');
+        return;
+    }
+
+    if (chosenPlan !== 'free' && chosenPlan !== 'premium') {
+        alert('Выберите тариф');
+        return;
+    }
+
+    // Проверяем, есть ли уже такой пользователь
+    const existingUser = localStorage.getItem(`eduflowUser_${email}`);
+
+    if (existingUser) {
+        alert('Пользователь с таким email уже существует');
+        return;
+    }
+
+    // Сохраняем данные пользователя
+    const user = {
+        email: email,
+        password: password,
+        plan: chosenPlan,
+        date: new Date().toLocaleString()
+    };
+
+    localStorage.setItem(`eduflowUser_${email}`, JSON.stringify(user));
+
+    // Сообщение об успехе
+    const notification = document.getElementById('notification');
+    notification.textContent = 'Вы успешно зарегистрированы!';
+    notification.classList.add('show');
+
+    // Скрываем через 3 секунды
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+
+    this.reset(); // Очистка формы
+});
+
+    // Вход
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.email.value.trim();
+        const password = this.password.value;
+
+        const savedUser = localStorage.getItem(`eduflowUser_${email}`);
+
+        if (savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            if (parsedUser.password === password) {
+                localStorage.setItem('eduflowCurrentUser', email); // Запоминаем текущего пользователя
+                window.location.href = 'dashboard.html';
+            } else {
+                alert('Неверный пароль');
+            }
+        } else {
+            alert('Пользователь не найден');
+        }
+    });
+
+    // Закрытие попапа
+    document.getElementById('closePopup').addEventListener('click', () => {
+        popup.style.display = 'none';
+    });
+
+    // Переход после регистрации
+    document.getElementById('goToDashboard').addEventListener('click', () => {
+        window.location.href = 'dashboard.html';
+    });
+
+    // Переход
+    document.getElementById('goToDashboard').addEventListener('click', () => {
+        window.location.href = "dashboard.html";
+    });
+</script>
+<div id="notification" class="notification"></div>
+</body>
+</html>

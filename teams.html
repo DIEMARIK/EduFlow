@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Команды | EduFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2>EduFlow</h2>
+        <ul>
+            <li><a href="dashboard.html">Главная</a></li>
+            <li><a href="courses.html">Мои курсы</a></li>
+            <li><a href="tasks.html">Задания</a></li>
+            <li class="premium-only"><a href="achievements.html">Достижения</a></li>
+            <li class="premium-only"><a href="feedback.html">Обратная связь</a></li>
+        </ul>
+        <ul style="margin-top: auto;">
+            <li><a href="#" id="logoutBtn">Выйти</a></li>
+        </ul>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <h1>Командная работа</h1>
+
+        <p>Присоединяйтесь к командам или создайте свою, чтобы работать вместе над заданиями!</p>
+
+        <!-- Форма создания команды -->
+        <div class="card-box">
+            <h3>Создать новую команду</h3>
+            <form id="createTeamForm">
+                <input type="text" id="teamName" placeholder="Название команды" required />
+                <button type="submit" class="btn">Создать</button>
+            </form>
+        </div>
+
+        <!-- Присоединение к команде -->
+        <div class="card-box">
+            <h3>Присоединиться к существующей команде</h3>
+            <select id="joinTeamSelect"></select>
+            <button id="joinTeamBtn" class="btn">Присоединиться</button>
+        </div>
+
+        <!-- Текущая команда -->
+        <div class="card-box" id="currentTeamCard">
+            <h3>Вы состоите в команде:</h3>
+            <p id="currentTeamName">—</p>
+            <button id="leaveTeamBtn" class="btn red">Покинуть команду</button>
+        </div>
+
+        <!-- Чат команды -->
+        <div class="card-box" id="teamChatBox" style="display: none;">
+            <h3>Чат команды</h3>
+            <div id="chatMessages" style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: #f9f9f9; margin-bottom: 10px;"></div>
+            <input type="text" id="chatInput" placeholder="Введите сообщение..." style="width: calc(100% - 100px); padding: 8px;" />
+            <button id="sendChatBtn" class="btn" style="width: 90px;">Отправить</button>
+        </div>
+    </div>
+
+</div>
+<script src="auth.js"></script>
+<script>
+    
+    const currentUserEmail = localStorage.getItem('eduflowCurrentUser');
+
+    if (!currentUserEmail) {
+        alert("Вы не авторизованы");
+        window.location.href = "index.html";
+        exit;
+    }
+
+    const currentTeamNameEl = document.getElementById("currentTeamName");
+    const teamChatBox = document.getElementById("teamChatBox");
+    const chatMessages = document.getElementById("chatMessages");
+
+    // Получаем текущего пользователя
+    const user = JSON.parse(localStorage.getItem(`eduflowUser_${currentUserEmail}`));
+    // --- Основной контент ---
+document.getElementById("userEmail").textContent = user.email;
+document.getElementById("userPlan").textContent = user.plan; // Для проверки
+document.getElementById("userDate").textContent = user.date;
+
+// --- Скрытие премиум-разделов в меню ---
+const premiumOnlyLinks = document.querySelectorAll(".premium-only");
+
+// Убедимся, что элементы загружены
+window.addEventListener("DOMContentLoaded", () => {
+    if (user.plan.toLowerCase() !== "premium") {
+        premiumOnlyLinks.forEach(link => {
+            link.style.display = "none";
+        });
+    }
+});
+
+    // Получаем список команд
+    let teams = JSON.parse(localStorage.getItem("eduflowTeams")) || {};
+
+    // Отображение текущей команды
+    function updateCurrentTeamDisplay() {
+        const currentTeam = user.currentTeam;
+
+        if (currentTeam && teams[currentTeam]) {
+            currentTeamNameEl.textContent = teams[currentTeam].name;
+            teamChatBox.style.display = "block";
+            renderChat();
+        } else {
+            currentTeamNameEl.textContent = "—";
+            teamChatBox.style.display = "none";
+        }
+    }
+
+    updateCurrentTeamDisplay();
+
+    // Заполнение списка команд для присоединения
+    const joinTeamSelect = document.getElementById("joinTeamSelect");
+
+    for (let teamId in teams) {
+        const option = document.createElement("option");
+        option.value = teamId;
+        option.textContent = teams[teamId].name;
+        joinTeamSelect.appendChild(option);
+    }
+
+    // Форма создания команды
+    document.getElementById("createTeamForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const teamName = document.getElementById("teamName").value.trim();
+
+        if (!teamName) {
+            alert("Введите название команды");
+            return;
+        }
+
+        const teamId = "team_" + Date.now(); // Уникальный ID
+        teams[teamId] = {
+            name: teamName,
+            members: [currentUserEmail],
+            messages: []
+        };
+
+        // Сохраняем команду
+        localStorage.setItem("eduflowTeams", JSON.stringify(teams));
+
+        // Обновляем список выбора
+        const option = document.createElement("option");
+        option.value = teamId;
+        option.textContent = teamName;
+        joinTeamSelect.appendChild(option);
+
+        // Обновляем данные пользователя
+        user.currentTeam = teamId;
+        localStorage.setItem(`eduflowUser_${currentUserEmail}`, JSON.stringify(user));
+
+        // Обновляем отображение
+        updateCurrentTeamDisplay();
+        this.reset();
+
+        alert("Команда успешно создана!");
+    });
+
+    // Кнопка присоединения
+    document.getElementById("joinTeamBtn").addEventListener("click", function() {
+        const selectedTeamId = joinTeamSelect.value;
+
+        if (!selectedTeamId) {
+            alert("Выберите команду");
+            return;
+        }
+
+        if (teams[selectedTeamId].members.includes(currentUserEmail)) {
+            alert("Вы уже состоите в этой команде");
+            return;
+        }
+
+        // Добавляем пользователя в команду
+        teams[selectedTeamId].members.push(currentUserEmail);
+        localStorage.setItem("eduflowTeams", JSON.stringify(teams));
+
+        // Обновляем данные пользователя
+        user.currentTeam = selectedTeamId;
+        localStorage.setItem(`eduflowUser_${currentUserEmail}`, JSON.stringify(user));
+
+        // Обновляем отображение
+        updateCurrentTeamDisplay();
+        alert("Вы успешно присоединились к команде!");
+    });
+
+    // Покинуть команду
+    document.getElementById("leaveTeamBtn").addEventListener("click", function() {
+        const currentTeam = user.currentTeam;
+
+        if (!currentTeam) return;
+
+        // Удаляем пользователя из команды
+        const team = teams[currentTeam];
+        team.members = team.members.filter(email => email !== currentUserEmail);
+        if (team.members.length === 0) {
+            delete teams[currentTeam]; // Удаляем пустую команду
+        }
+
+        localStorage.setItem("eduflowTeams", JSON.stringify(teams));
+
+        // Обновляем данные пользователя
+        delete user.currentTeam;
+        localStorage.setItem(`eduflowUser_${currentUserEmail}`, JSON.stringify(user));
+
+        // Обновляем отображение
+        updateCurrentTeamDisplay();
+        alert("Вы покинули команду");
+    });
+
+    // Чат
+    document.getElementById("sendChatBtn").addEventListener("click", function() {
+        const messageText = document.getElementById("chatInput").value.trim();
+
+        if (!messageText) return;
+
+        const teamId = user.currentTeam;
+        const team = teams[teamId];
+
+        team.messages.push({
+            author: currentUserEmail,
+            text: messageText,
+            time: new Date().toLocaleString()
+        });
+
+        localStorage.setItem("eduflowTeams", JSON.stringify(teams));
+        document.getElementById("chatInput").value = "";
+        renderChat();
+    });
+
+    function renderChat() {
+        const teamId = user.currentTeam;
+        const team = teams[teamId];
+
+        chatMessages.innerHTML = "";
+
+        team.messages.forEach(msg => {
+            const div = document.createElement("div");
+            div.style.marginBottom = "8px";
+            div.innerHTML = `<strong>${msg.author}</strong> (${msg.time}):<br>${msg.text}`;
+            chatMessages.appendChild(div);
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+</script>
+
+</body>
+</html>

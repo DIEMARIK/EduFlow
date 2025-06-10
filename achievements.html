@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Достижения | EduFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2>EduFlow</h2>
+        <ul>
+            <li><a href="dashboard.html">Главная</a></li>
+            <li><a href="courses.html">Мои курсы</a></li>
+            <li><a href="tasks.html">Задания</a></li>
+            <li><a href="stats.html">Статистика</a></li>
+            <li class="premium-only"><a href="feedback.html">Обратная связь</a></li>
+            <li><a href="settings.html">Настройки</a></li>
+        </ul>
+        <ul style="margin-top: auto;">
+            <li><a href="#" id="logoutBtn">Выйти</a></li>
+        </ul>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <h1>Ваши достижения</h1>
+
+        <div class="cards" id="badgesList">
+            <div class="card-box">
+                <h3>🏆 Начинающий</h3>
+                <p>Вы набрали 100 очков</p>
+            </div>
+            <div class="card-box">
+                <h3>🚀 Продвинутый</h3>
+                <p>Вы набрали 250 очков</p>
+            </div>
+            <div class="card-box">
+                <h3>🎓 Профессионал</h3>
+                <p>Вы набрали 500 очков</p>
+            </div>
+        </div>
+
+        <div class="card-box">
+            <h3>Таблица лидеров</h3>
+            <ol id="leaderboard"></ol>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    
+    // Получаем текущего пользователя
+const currentUserEmail = localStorage.getItem('eduflowCurrentUser');
+
+if (!currentUserEmail) {
+    alert("Вы не авторизованы");
+    window.location.href = "index.html";
+    exit;
+}
+
+// Загружаем данные пользователя
+const userDataString = localStorage.getItem(`eduflowUser_${currentUserEmail}`);
+if (!userDataString) {
+    alert("Ошибка загрузки данных");
+    window.location.href = "index.html";
+    exit;
+}
+
+const user = JSON.parse(userDataString);
+
+// Проверяем тариф
+if (user.plan !== "premium") {
+    if (confirm("Этот раздел доступен только для пользователей с тарифом Premium. Перейти на главную?")) {
+        window.location.href = "dashboard.html";
+    } else {
+        document.body.innerHTML = `
+            <div style="padding: 40px; text-align: center;">
+                <h2>Доступ ограничен</h2>
+                <p>Этот раздел доступен только для пользователей с тарифом Premium.</p>
+                <a href="dashboard.html" class="btn">На главную</a>
+            </div>
+        `;
+    }
+}
+
+    // Лидерборд
+    function updateLeaderboard() {
+        const allUsers = {};
+        for (let key in localStorage) {
+            if (key.startsWith("eduflowUser_")) {
+                const email = key.replace("eduflowUser_", "");
+                const data = JSON.parse(localStorage.getItem(key));
+                const points = parseInt(localStorage.getItem(`eduflowPoints_${email}`)) || 0;
+                allUsers[email] = { ...data, points };
+            }
+        }
+
+        const usersArray = Object.values(allUsers);
+        usersArray.sort((a, b) => b.points - a.points);
+
+        const leaderboard = document.getElementById("leaderboard");
+        leaderboard.innerHTML = "";
+
+        usersArray.forEach((u, index) => {
+            const li = document.createElement("li");
+            li.textContent = `${u.email} — ${u.points} очков`;
+            leaderboard.appendChild(li);
+        });
+    }
+
+    updateLeaderboard();
+
+    // Скрытие премиум-разделов в меню
+const premiumOnlyLinks = document.querySelectorAll(".premium-only");
+
+if (user.plan !== "Premium") {
+    premiumOnlyLinks.forEach(link => link.style.display = "none");
+}
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

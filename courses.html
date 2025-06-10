@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы | EduFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2>EduFlow</h2>
+        <ul>
+            <li><a href="dashboard.html">Главная</a></li>
+            <li><a href="tasks.html">Задания</a></li>
+            <li><a href="stats.html">Статистика</a></li>
+            <li class="premium-only"><a href="achievements.html">Достижения</a></li>
+            <li class="premium-only"><a href="feedback.html">Обратная связь</a></li>
+            <li><a href="settings.html">Настройки</a></li>
+        </ul>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <h1>Мои курсы</h1>
+        <div id="coursesList"></div>
+    </div>
+
+</div>
+
+<script src="data.js"></script>
+<script>
+    // Получаем текущего пользователя
+    const currentUserEmail = localStorage.getItem('eduflowCurrentUser');
+
+    if (!currentUserEmail) {
+        alert("Вы не авторизованы");
+        window.location.href = "index.html";
+    }
+
+    const userDataString = localStorage.getItem(`eduflowUser_${currentUserEmail}`);
+
+    if (!userDataString) {
+        alert("Данные пользователя не найдены");
+        window.location.href = "index.html";
+    }
+
+    const user = JSON.parse(userDataString);
+
+    // Пример курсов
+    const demoCourses = [
+        { id: 1, title: "Математика для 7 класса", progress: 60 },
+        { id: 2, title: "Английский: Базовый уровень", progress: 35 }
+    ];
+
+    const coursesList = document.getElementById("coursesList");
+
+    if (coursesList) {
+        demoCourses.forEach(course => {
+            const card = document.createElement("div");
+            card.className = "card-box";
+            card.innerHTML = `
+                <h3>${course.title}</h3>
+                <p>Прогресс: ${course.progress}%</p>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${course.progress}%;">${course.progress}%</div>
+                </div>
+            `;
+            coursesList.appendChild(card);
+        });
+    }
+
+    // Скрытие премиум-разделов в меню
+    const premiumOnlyLinks = document.querySelectorAll(".premium-only");
+
+    if (user && user.plan !== "premium") {
+        premiumOnlyLinks.forEach(link => link.style.display = "none");
+    }
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

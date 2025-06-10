@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обратная связь | EduFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2>EduFlow</h2>
+        <ul>
+            <li><a href="dashboard.html">Главная</a></li>
+            <li><a href="courses.html">Мои курсы</a></li>
+            <li><a href="tasks.html">Задания</a></li>
+            <li><a href="stats.html">Статистика</a></li>
+            <li class="premium-only"><a href="achievements.html">Достижения</a></li>
+            <li><a href="settings.html">Настройки</a></li>
+        </ul>
+        <ul style="margin-top: auto;">
+            <li><a href="#" id="logoutBtn">Выйти</a></li>
+        </ul>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <h1>Обратная связь от учителей</h1>
+        <p>Посмотрите комментарии и рекомендации по вашим выполненным заданиям.</p>
+
+        <div class="cards" id="feedbackList">
+            <!-- Сюда будут добавлены карточки обратной связи -->
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Получаем текущего пользователя
+    const currentUserEmail = localStorage.getItem('eduflowCurrentUser');
+
+    if (!currentUserEmail) {
+        alert("Вы не авторизованы");
+        window.location.href = "index.html";
+        throw new Error("Не авторизован");
+    }
+
+    // Загружаем данные пользователя
+    const userDataString = localStorage.getItem(`eduflowUser_${currentUserEmail}`);
+    if (!userDataString) {
+        alert("Ошибка загрузки данных");
+        window.location.href = "index.html";
+        throw new Error("Нет данных пользователя");
+    }
+
+    const user = JSON.parse(userDataString);
+
+    // Проверка на тариф
+    if (user.plan !== "premium") {
+        if (confirm("Этот раздел доступен только для пользователей с тарифом Premium. Перейти на главную?")) {
+            window.location.href = "dashboard.html";
+        } else {
+            document.body.innerHTML = `
+                <div style="padding: 40px; text-align: center;">
+                    <h2>Доступ ограничен</h2>
+                    <p>Этот раздел доступен только для пользователей с тарифом Premium.</p>
+                    <a href="dashboard.html" class="btn">На главную</a>
+                </div>
+            `;
+        }
+        throw new Error("Нет доступа: требуется Premium");
+    }
+
+    // Скрытие премиум-ссылок, если не Premium (защита на всякий случай)
+    const premiumOnlyLinks = document.querySelectorAll(".premium-only");
+    if (user.plan !== "premium") {
+        premiumOnlyLinks.forEach(link => link.style.display = "none");
+    }
+
+    // Пример данных обратной связи
+    const sampleFeedback = [
+        {
+            taskId: 1,
+            title: "Домашнее задание по алгебре",
+            teacher: "Иванова Н.С.",
+            comment: "Хорошее понимание темы, но были ошибки в вычислениях.",
+            date: "2025-04-03"
+        },
+        {
+            taskId: 2,
+            title: "Тест по грамматике",
+            teacher: "Петров А.А.",
+            comment: "Отличный результат! Хорошее знание времён.",
+            date: "2025-04-02"
+        }
+    ];
+
+    // Сохраняем пример данных, если их ещё нет
+    const feedbackKey = `eduflowFeedback_${currentUserEmail}`;
+    if (!localStorage.getItem(feedbackKey)) {
+        localStorage.setItem(feedbackKey, JSON.stringify(sampleFeedback));
+    }
+
+    const feedbackList = document.getElementById("feedbackList");
+    const storedFeedback = JSON.parse(localStorage.getItem(feedbackKey));
+
+    if (!storedFeedback || storedFeedback.length === 0) {
+        feedbackList.innerHTML = "<p>Нет обратной связи</p>";
+    } else {
+        storedFeedback.forEach(feedback => {
+            const card = document.createElement("div");
+            card.className = "card-box";
+            card.innerHTML = `
+                <h3>${feedback.title}</h3>
+                <p><strong>Учитель:</strong> ${feedback.teacher}</p>
+                <p><strong>Дата:</strong> ${feedback.date}</p>
+                <p><strong>Комментарий:</strong> ${feedback.comment}</p>
+            `;
+            feedbackList.appendChild(card);
+        });
+    }
+</script>
+
+<script src="auth.js"></script>
+</body>
+</html>

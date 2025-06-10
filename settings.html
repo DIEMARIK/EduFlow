@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Настройки | EduFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2>EduFlow</h2>
+        <ul>
+            <li><a href="dashboard.html">Главная</a></li>
+            <li><a href="courses.html">Мои курсы</a></li>
+            <li><a href="tasks.html">Задания</a></li>
+            <li class="premium-only"><a href="achievements.html">Достижения</a></li>
+            <li class="premium-only"><a href="feedback.html">Обратная связь</a></li>
+            <li><a href="stats.html">Прогресс</a></li>
+        </ul>
+        <ul style="margin-top: auto;">
+            <li><a href="#" id="logoutBtn">Выйти</a></li>
+        </ul>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <h1>Настройки профиля</h1>
+
+        <div class="card-box">
+            <h3>Ваш аккаунт</h3>
+            <p><strong>Email:</strong> <span id="userEmail">Загрузка...</span></p>
+            <p><strong>Тариф:</strong> <span id="userPlan">Загрузка...</span></p>
+        </div>
+
+        <div class="card-box">
+            <h3>Сменить пароль</h3>
+            <form id="changePasswordForm">
+                <input type="password" id="currentPassword" placeholder="Текущий пароль" required />
+                <input type="password" id="newPassword" placeholder="Новый пароль" required />
+                <input type="password" id="confirmPassword" placeholder="Повторите новый пароль" required />
+                <button type="submit" class="btn">Сохранить пароль</button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    
+    // Проверяем текущего пользователя
+    const currentUserEmail = localStorage.getItem('eduflowCurrentUser');
+
+    if (!currentUserEmail) {
+        alert("Вы не авторизованы");
+        window.location.href = "index.html";
+        exit;
+    }
+
+    const userData = JSON.parse(localStorage.getItem(`eduflowUser_${currentUserEmail}`));
+
+    if (!userData) {
+        alert("Ошибка загрузки данных");
+        window.location.href = "index.html";
+        exit;
+    }
+
+    // Заполняем данные
+    document.getElementById("userEmail").textContent = userData.email;
+    document.getElementById("userPlan").textContent = userData.plan;
+
+    // Обработка формы смены пароля
+    document.getElementById("changePasswordForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const currentPass = document.getElementById("currentPassword").value;
+        const newPass = document.getElementById("newPassword").value;
+        const confirmPass = document.getElementById("confirmPassword").value;
+
+        if (currentPass !== userData.password) {
+            alert("Неверный текущий пароль");
+            return;
+        }
+
+        if (newPass !== confirmPass) {
+            alert("Новые пароли не совпадают");
+            return;
+        }
+
+        if (newPass.length < 6) {
+            alert("Пароль должен быть не короче 6 символов");
+            return;
+        }
+
+        // Обновляем пароль
+        userData.password = newPass;
+        localStorage.setItem(`eduflowUser_${currentUserEmail}`, JSON.stringify(userData));
+
+        alert("Пароль успешно изменён!");
+        this.reset();
+    });
+
+    // Скрытие премиум-разделов в меню
+const premiumOnlyLinks = document.querySelectorAll(".premium-only");
+
+if (user.plan !== "Premium") {
+    premiumOnlyLinks.forEach(link => link.style.display = "none");
+}
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

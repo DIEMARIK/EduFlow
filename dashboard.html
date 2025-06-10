@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Личный кабинет | EduFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Боковое меню -->
+    <div class="sidebar">
+        <h2>EduFlow</h2>
+        <ul>
+            <li><a href="courses.html">Мои курсы</a></li>
+            <li><a href="tasks.html">Задания</a></li>
+            <li><a href="stats.html">Прогресс</a></li>
+            <li class="premium-only"><a href="achievements.html">Достижения</a></li>
+            <li class="premium-only"><a href="feedback.html">Обратная связь</a></li>
+            <li><a href="teams.html">Команды</a></li>
+            <li><a href="settings.html">Настройки</a></li>
+            <li><a href="#" id="logoutBtn">Выйти</a></li>
+        </ul>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <h1>Добро пожаловать!</h1>
+
+        <!-- Информация о пользователе -->
+        <div class="cards">
+            <div class="card-box">
+                <h3>Ваш Email</h3>
+                <p id="userEmail">Загрузка...</p>
+            </div>
+            <div class="card-box">
+                <h3>Тариф</h3>
+                <p id="userPlan">Загрузка...</p>
+            </div>
+            <div class="card-box">
+                <h3>Дата регистрации</h3>
+                <p id="userDate">Загрузка...</p>
+            </div>
+        </div>
+
+        <!-- Быстрые действия с расширением -->
+<h2 style="margin-top: 40px;">Быстрые действия</h2>
+<div class="cards">
+
+    <!-- Курсы -->
+    <div class="card-box">
+        <h3>Начать курс</h3>
+        <p>Выберите подходящий курс по вашему уровню.</p>
+        <div class="badge">Активных курсов: <strong id="courseCount">2</strong></div>
+        <button onclick="goToPage('courses.html')">Перейти к курсам</button>
+    </div>
+
+    <!-- Задания -->
+    <div class="card-box">
+        <h3>Проверить задания</h3>
+        <p>Узнайте, какие задания ждут вас.</p>
+        <div class="badge red">Всего заданий: <strong id="taskCount">3</strong></div>
+        <button onclick="goToPage('tasks.html')">Перейти к заданиям</button>
+    </div>
+
+    <!-- Статистика -->
+    <div class="card-box">
+        <h3>Статистика</h3>
+        <p>Посмотрите свой прогресс за месяц.</p>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 65%;">65%</div>
+        </div>
+        <button onclick="goToPage('stats.html')">Подробнее</button>
+    </div>
+    <section>
+<!-- Геймификация -->
+<h2 style="margin-top: 0px;">Ваш прогресс</h2>
+<div class="cards">
+    <div class="card-box">
+        <h3>Очки</h3>
+        <p id="userPoints">Загрузка...</p>
+    </div>
+    <div class="card-box">
+        <h3>Уровень</h3>
+        <p id="userLevel">Загрузка...</p>
+    </div>
+    <div class="card-box">
+        <h3>Последняя награда</h3>
+        <p id="userBadge">Нет наград</p>
+    </div>
+</div>
+</section>
+</div>
+    </div>
+
+</div>
+<script src="auth.js"></script>
+<script>
+ 
+    // Получаем текущего пользователя
+const currentUserEmail = localStorage.getItem('eduflowCurrentUser');
+
+if (!currentUserEmail) {
+    alert("Вы не авторизованы");
+    window.location.href = "index.html";
+    exit;
+}
+
+// Загружаем данные пользователя
+const userDataString = localStorage.getItem(`eduflowUser_${currentUserEmail}`);
+
+if (!userDataString) {
+    alert("Данные пользователя не найдены");
+    window.location.href = "index.html";
+    exit;
+}
+
+const user = JSON.parse(userDataString);
+
+// --- Основной контент ---
+document.getElementById("userEmail").textContent = user.email;
+document.getElementById("userPlan").textContent = user.plan; // Для проверки
+document.getElementById("userDate").textContent = user.date;
+
+// --- Скрытие премиум-разделов в меню ---
+ premiumOnlyLinks = document.querySelectorAll(".premium-only");
+
+// Убедимся, что элементы загружены
+window.addEventListener("DOMContentLoaded", () => {
+    if (user.plan.toLowerCase() !== "premium") {
+        premiumOnlyLinks.forEach(link => {
+            link.style.display = "none";
+        });
+    }
+});
+
+
+    // Функция для перехода по страницам
+    function goToPage(page) {
+        window.location.href = page;
+    }
+
+    // Демо-данные
+    const demoData = {
+        courseCount: 2,
+        taskCount: 3,
+        progressPercent: 65
+    };
+
+    document.getElementById("courseCount").textContent = demoData.courseCount;
+    document.getElementById("taskCount").textContent = demoData.taskCount;
+    document.getElementById("progressBar").style.width = demoData.progressPercent + "%";
+    document.getElementById("progressBar").textContent = demoData.progressPercent + "%";
+// Геймификация
+let points = parseInt(localStorage.getItem(`eduflowPoints_${currentUserEmail}`)) || 0;
+let level = 1;
+
+// Расчёт уровня по очкам
+if (points >= 100) level = Math.floor(points / 100) + 1;
+
+document.getElementById("userPoints").textContent = `${points} очков`;
+document.getElementById("userLevel").textContent = `Уровень ${level}`;
+
+// Пример простой системы наград
+const badges = {
+    100: "Начинающий",
+    250: "Продвинутый",
+    500: "Профессионал"
+};
+
+let lastBadge = "Нет наград";
+
+for (let threshold in badges) {
+    if (points >= threshold) {
+        lastBadge = badges[threshold];
+    }
+}
+window.addEventListener('storage', function(event) {
+    if (event.key === `eduflowUser_${currentUserEmail}`) {
+        const updatedUser = JSON.parse(event.newValue);
+        document.getElementById("userPlan").textContent = updatedUser.plan;
+    }
+});
+document.getElementById("userBadge").textContent = lastBadge;
+// Скрытие премиум-разделов в меню
+const premiumOnlyLinks = document.querySelectorAll(".premium-only");
+
+if (user.plan !== "Premium") {
+    premiumOnlyLinks.forEach(link => link.style.display = "none");
+}
+</script>
+
+</body>
+</html>
